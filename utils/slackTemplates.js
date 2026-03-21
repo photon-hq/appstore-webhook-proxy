@@ -295,8 +295,8 @@ function buildSlackMessage(payload) {
         },
       ];
 
-      // Optional deep links (only if you want)
-      // If you know adamId, you COULD build a link to that specific build in TestFlight QA dashboard,
+      // Optional deep links (only if we want)
+      // If we know adamId, we COULD build a link to that specific build in TestFlight QA dashboard,
       // but Apple doesn't give the build number or train here, so we skip to avoid broken links.
 
       return { blocks };

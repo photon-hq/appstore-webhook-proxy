@@ -1,4 +1,4 @@
-# App Store Webhook Proxy for Microsoft Teams & Slack
+# App Store Webhook Proxy for Microsoft Teams, Slack & Azure DevOps
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Node.js](https://img.shields.io/badge/node-%3E%3D18.x-brightgreen)
@@ -9,10 +9,11 @@
 
 ![Slack Integration](https://img.shields.io/badge/slack-supported-4A154B?logo=slack&logoColor=white)
 ![MS Teams Integration](https://img.shields.io/badge/teams-supported-6264A7?logo=microsoft-teams&logoColor=white)
+![Azure DevOps Integration](https://img.shields.io/badge/azure%20devops-supported-0078D7?logo=azure-devops&logoColor=white)
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-%E2%98%95-blue)](https://coff.ee/alexiou)
 
-This project provides a simple, secure Node.js proxy to forward webhook events from **App Store Connect** to **Microsoft Teams** and/or **Slack**, including signature verification and platform-specific formatting.
+This project provides a simple, secure Node.js proxy to forward webhook events from **App Store Connect** to **Microsoft Teams** and/or **Slack**, including signature verification and platform-specific formatting. It can also **automatically create Pull Requests in Azure DevOps** when your app goes live on the App Store.
 ---
 
 ## 🚀 Features
@@ -21,6 +22,9 @@ This project provides a simple, secure Node.js proxy to forward webhook events f
 - ✅ Forwards formatted messages to Microsoft Teams and Slack
 - ✅ Custom message templates per platform
 - ✅ Supports custom timezones for event timestamps
+- ✅ Automatic Azure DevOps PR creation when app is published (`READY_FOR_SALE`)
+- ✅ Auto-complete with squash merge on created PRs
+- ✅ Configurable trigger state for testing (via `APPLE_EVENT_TRIGGER`)
 - ✅ Error handling and logging
 - ✅ Dockerized and ready for deployment (e.g. Render, Railway)
 - ✅ One-click deployable to Render
@@ -30,6 +34,7 @@ This project provides a simple, secure Node.js proxy to forward webhook events f
 ## 📋 Prerequisites
 1. App Store Connect access with one of the following roles: **Account Holder**, **Admin**, or **App Manager** to create a webhook.
 2. A configured workspace in either: Microsoft Teams and/or Slack
+3. *(Optional)* An **Azure DevOps Personal Access Token (PAT)** with **Code (Read & Write)** scope, if you want automatic PR creation when the app goes live.
 
 ---
 
@@ -53,6 +58,23 @@ End-to-end simple installation guides, from installing the proxy to get the test
 
 ![Slack TestFlight Screenshot Notification](documentation/assets/SlackTestFlightFeedbackScreenshot.png)
 ![Slack TestFlight Crash Notification](documentation/assets/SlackTestFlightCrashScreenshot.png)
+
+### 🔀 Azure DevOps — Automatic PR Creation
+
+When your app reaches `READY_FOR_SALE` (live on the App Store), the proxy can automatically create a Pull Request in Azure DevOps with auto-complete enabled (squash merge). The source and target branches are configurable via `AZURE_DEVOPS_SOURCE_BRANCH` and `AZURE_DEVOPS_TARGET_BRANCH` (defaults: `master` → `release/production`).
+
+**How it works:**
+1. Apple sends a webhook with `appStoreVersionAppVersionStateUpdated` and `newValue: "READY_FOR_SALE"`
+2. The proxy creates a PR in your Azure DevOps repository
+3. Auto-complete is enabled on the PR (squash merge, source branch preserved)
+4. If PR creation fails, a failure notification is sent to Teams/Slack
+
+**Setup:**
+1. Create a PAT in Azure DevOps at `https://dev.azure.com/{YourOrg}/_usersSettings/tokens` with **Code (Read & Write)** scope
+2. Set the required environment variables: `AZURE_DEVOPS_PAT`, `AZURE_DEVOPS_ORG_URL`, `AZURE_DEVOPS_PROJECT`, `AZURE_DEVOPS_REPO_ID`
+3. *(Optional)* Override source/target branches via `AZURE_DEVOPS_SOURCE_BRANCH` and `AZURE_DEVOPS_TARGET_BRANCH`
+
+> This feature is entirely optional. If `AZURE_DEVOPS_PAT` is not set, the proxy works exactly as before (Teams/Slack only).
 
 ---
 
@@ -130,6 +152,13 @@ Create a `.env` file (or set variables directly in your cloud environment):
 | `APP_ADAM_ID`        | *(Optional – Used for TestFlight feedback).* The App Store Connect "adamId" of your app. Required to generate links to App Store Connect and Xcode Organizer in TestFlight screenshot feedback messages. | *(empty)*     |
 | `APP_BUNDLE_ID`      | *(Optional – Used for TestFlight feedback).* The bundle identifier of your app (e.g. `com.company.app`). Required to generate Xcode Organizer links for TestFlight screenshot feedback. | *(empty)*     |
 | `APP_PLATFORM_ID`    | *(Optional – Used for TestFlight feedback).* The App Store Connect platform ID (e.g. `iOS`). Required to generate Xcode Organizer links for TestFlight screenshot feedback. | *(empty)*     |
+| `AZURE_DEVOPS_PAT`     | *(Optional – Required for Azure DevOps PR creation).* Personal Access Token with **Code (Read & Write)** scope. If not set, PR creation is skipped entirely.<br>Create one at: `https://dev.azure.com/{YourOrg}/_usersSettings/tokens` | *(empty)*     |
+| `AZURE_DEVOPS_ORG_URL` | *(Optional – Required for Azure DevOps PR creation).* Your Azure DevOps organization URL.<br>Example: `https://dev.azure.com/YourOrg` | *(empty)*     |
+| `AZURE_DEVOPS_PROJECT` | *(Optional – Required for Azure DevOps PR creation).* Azure DevOps project name. | *(empty)*     |
+| `AZURE_DEVOPS_REPO_ID` | *(Optional – Required for Azure DevOps PR creation).* Repository ID or name in Azure DevOps. | *(empty)*     |
+| `AZURE_DEVOPS_SOURCE_BRANCH` | *(Optional)* Source branch for the auto-created PR. | `master`      |
+| `AZURE_DEVOPS_TARGET_BRANCH` | *(Optional)* Target branch for the auto-created PR. | `release/production` |
+| `APPLE_EVENT_TRIGGER`  | *(Optional)* The Apple version state that triggers PR creation. Override with e.g. `WAITING_FOR_REVIEW` for testing without a real App Store release. | `READY_FOR_SALE` |
 | `ENABLE_TEST_ENDPOINT` | *(Optional – For local testing only).* When set to `true`, enables the internal `/test/webhook` route that allows you to manually POST Apple-style webhook payloads to simulate real events. This endpoint is disabled by default and should **never be enabled in production**.                                                                                                                                        | `false`       |
 | `INTERNAL_TEST_TOKEN`  | *(Optional – Recommended when testing).* Security token required via the `x-internal-token` HTTP header when calling `/test/webhook`. Helps prevent unauthorized access to the test endpoint. Ignored if `ENABLE_TEST_ENDPOINT` is `false`.                                                                                                                                                                              | *(empty)*     |
 
@@ -170,7 +199,8 @@ http://localhost:3000/appstore-webhook
 .
 ├── app.js                 # Entry point
 ├── routes/
-│   └── webhook.js         # Webhook handler
+│   ├── webhook.js         # Webhook handler
+│   └── testWebhook.js     # Test endpoint handler
 ├── utils/
 │   ├── eventTemplates.js  # Teams formatter
 │   ├── slackTemplates.js  # Slack formatter
@@ -178,7 +208,9 @@ http://localhost:3000/appstore-webhook
 ├── services/
 │   ├── signatureVerifier.js
 │   ├── teamsNotifier.js
-│   └── slackNotifier.js
+│   ├── slackNotifier.js
+│   ├── azureDevOpsService.js  # Azure DevOps REST API client
+│   └── releaseAutomation.js   # PR creation orchestration
 ├── middleware/
 │   ├── errorHandler.js
 │   └── logging.js

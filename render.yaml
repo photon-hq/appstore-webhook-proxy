@@ -16,3 +16,17 @@ services:
         sync: false
       - key: SLACK_WEBHOOK_URL
         sync: false
+      - key: AZURE_DEVOPS_PAT
+        sync: false
+      - key: AZURE_DEVOPS_ORG_URL
+        sync: false
+      - key: AZURE_DEVOPS_PROJECT
+        sync: false
+      - key: AZURE_DEVOPS_REPO_ID
+        sync: false
+      - key: AZURE_DEVOPS_SOURCE_BRANCH
+        sync: false
+      - key: AZURE_DEVOPS_TARGET_BRANCH
+        sync: false
+      - key: APPLE_EVENT_TRIGGER
+        sync: false

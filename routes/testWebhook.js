@@ -3,6 +3,7 @@ const router = express.Router();
 
 const { sendToTeams } = require("../services/teamsNotifier");
 const { sendToSlack } = require("../services/slackNotifier");
+const { handleAppPublished } = require("../services/releaseAutomation");
 
 const ENABLE_TEST_ENDPOINT = process.env.ENABLE_TEST_ENDPOINT === "true";
 const INTERNAL_TEST_TOKEN = process.env.INTERNAL_TEST_TOKEN;
@@ -34,6 +35,7 @@ router.post("/", async (req, res) => {
     const results = {
       slack: "skipped",
       teams: "skipped",
+      azureDevOps: "skipped",
     };
 
     if (process.env.SLACK_WEBHOOK_URL) {
@@ -44,6 +46,18 @@ router.post("/", async (req, res) => {
     if (process.env.TEAMS_WEBHOOK_URL) {
       await sendToTeams(payload, process.env.TEAMS_WEBHOOK_URL);
       results.teams = "sent";
+    }
+
+    // Azure DevOps: create release PR when app goes live
+    try {
+      const prResult = await handleAppPublished(payload);
+      if (prResult) {
+        results.azureDevOps = `PR #${prResult.pullRequestId} created`;
+      } else {
+        results.azureDevOps = "skipped (event not matched or PR exists)";
+      }
+    } catch (prError) {
+      results.azureDevOps = `error: ${prError.message}`;
     }
 
     res.status(200).json({

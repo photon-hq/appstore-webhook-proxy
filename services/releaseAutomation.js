@@ -5,6 +5,7 @@ const { sendToSlack } = require("./slackNotifier");
 const AZURE_DEVOPS_SOURCE_BRANCH = process.env.AZURE_DEVOPS_SOURCE_BRANCH || "master";
 const AZURE_DEVOPS_TARGET_BRANCH = process.env.AZURE_DEVOPS_TARGET_BRANCH || "release/production";
 const APPLE_EVENT_TRIGGER = process.env.APPLE_EVENT_TRIGGER || "READY_FOR_SALE";
+const ENABLE_AUTO_COMPLETE = process.env.ENABLE_AUTO_COMPLETE === "true";
 
 /**
  * Checks whether an Apple webhook payload should trigger a PR,
@@ -56,9 +57,12 @@ async function handleAppPublished(payload) {
       return null;
     }
 
-    await enableAutoComplete(result.pullRequestId);
+    if (ENABLE_AUTO_COMPLETE) {
+      await enableAutoComplete(result.pullRequestId);
+    }
 
-    console.log(`✅ Release PR #${result.pullRequestId} created and auto-complete enabled: ${result.url}`);
+    const autoCompleteStatus = ENABLE_AUTO_COMPLETE ? "auto-complete enabled" : "auto-complete disabled";
+    console.log(`✅ Release PR #${result.pullRequestId} created (${autoCompleteStatus}): ${result.url}`);
     return result;
   } catch (error) {
     console.error("❌ Failed to create Azure DevOps PR:", error.response?.data || error.message);

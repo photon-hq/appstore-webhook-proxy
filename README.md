@@ -60,6 +60,7 @@ End-to-end simple installation guides, from installing the proxy to get the test
 ![Slack TestFlight Crash Notification](documentation/assets/SlackTestFlightCrashScreenshot.png)
 
 ### 🔀 Azure DevOps — Automatic PR Creation
+![Azure DevOps PR Screenshot](documentation/assets/AzureDevOpsPR.png)
 
 When your app reaches `READY_FOR_SALE` (live on the App Store), the proxy can automatically create a Pull Request in Azure DevOps with auto-complete enabled (squash merge). The source and target branches are configurable via `AZURE_DEVOPS_SOURCE_BRANCH` and `AZURE_DEVOPS_TARGET_BRANCH` (defaults: `master` → `release/production`).
 

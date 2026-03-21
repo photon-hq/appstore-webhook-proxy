@@ -62,12 +62,14 @@ End-to-end simple installation guides, from installing the proxy to get the test
 ### 🔀 Azure DevOps — Automatic PR Creation
 ![Azure DevOps PR Screenshot](documentation/assets/AzureDevOpsPR.png)
 
-When your app reaches `READY_FOR_SALE` (live on the App Store), the proxy can automatically create a Pull Request in Azure DevOps with auto-complete enabled (squash merge). The source and target branches are configurable via `AZURE_DEVOPS_SOURCE_BRANCH` and `AZURE_DEVOPS_TARGET_BRANCH` (defaults: `master` → `release/production`).
+**📘 Step-by-step setup guide**: [Automate Your App Store Release Pipeline — Create Azure DevOps PRs from Apple Webhooks (Medium)](https://medium.com/@yannisalexiou/automate-your-app-store-release-pipeline-create-azure-devops-prs-from-apple-webhooks-37c8869e41b2)
+
+When your app reaches `READY_FOR_SALE` (live on the App Store), the proxy can automatically create a Pull Request in Azure DevOps (squash merge). The source and target branches are configurable via `AZURE_DEVOPS_SOURCE_BRANCH` and `AZURE_DEVOPS_TARGET_BRANCH` (defaults: `master` → `release/production`).
 
 **How it works:**
 1. Apple sends a webhook with `appStoreVersionAppVersionStateUpdated` and `newValue: "READY_FOR_SALE"`
 2. The proxy creates a PR in your Azure DevOps repository
-3. Auto-complete is enabled on the PR (squash merge, source branch preserved)
+3. Auto-complete is disabled on the PR (squash merge, source branch preserved). You can configured via `ENABLE_AUTO_COMPLETE`
 4. If PR creation fails, a failure notification is sent to Teams/Slack
 
 **Setup:**

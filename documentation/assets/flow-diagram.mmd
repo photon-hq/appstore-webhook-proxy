@@ -1,0 +1,15 @@
+graph LR
+    A["🍎 App Store Connect"] -->|"Webhook: READY_FOR_SALE"| B["⚙️ Webhook Proxy"]
+    B -->|"POST REST API"| C["🔀 Azure DevOps\nPR Created"]
+    B -->|"Webhook URL"| D["💬 Microsoft Teams\nNotification"]
+    B -->|"Webhook URL"| E["💬 Slack\nNotification"]
+    C -->|"Auto-complete\n(optional)"| F["✅ Squash Merge"]
+    B -.->|"On failure"| D
+    B -.->|"On failure"| E
+
+    style A fill:#000,color:#fff,stroke:#333
+    style B fill:#2563eb,color:#fff,stroke:#1d4ed8
+    style C fill:#0078D7,color:#fff,stroke:#005a9e
+    style D fill:#6264A7,color:#fff,stroke:#4b4da8
+    style E fill:#4A154B,color:#fff,stroke:#3b0f3c
+    style F fill:#16a34a,color:#fff,stroke:#15803d

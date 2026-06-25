@@ -12,9 +12,12 @@ const {
 const { DateTime } = require("luxon");
 
 function formatTimestamp(iso) {
-  const timezone = process.env.TIMEZONE || 'UTC';
-  const date = DateTime.fromISO(iso, { zone: 'utc' }).setZone(timezone);
-  return date.toFormat("ccc, dd LLL yyyy HH:mm:ss ZZZZ");
+  const date = DateTime.fromISO(iso, { zone: 'utc' });
+  const format = "ccc, dd LLL yyyy HH:mm:ss ZZZZ";
+  const sanFrancisco = date.setZone("America/Los_Angeles").toFormat(format);
+  const shanghai = date.setZone("Asia/Shanghai").toFormat(format);
+
+  return `San Francisco: ${sanFrancisco}\nShanghai: ${shanghai}`;
 }
 
 function buildTeamsMessage(payload) {

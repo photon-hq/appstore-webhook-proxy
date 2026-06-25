@@ -13,11 +13,7 @@ const { DateTime } = require("luxon");
 
 function formatTimestamp(iso) {
   const date = DateTime.fromISO(iso, { zone: 'utc' });
-  const format = "ccc, dd LLL yyyy HH:mm:ss ZZZZ";
-  const sanFrancisco = date.setZone("America/Los_Angeles").toFormat(format);
-  const shanghai = date.setZone("Asia/Shanghai").toFormat(format);
-
-  return `San Francisco: ${sanFrancisco}\nShanghai: ${shanghai}`;
+  return date.toUTC().toFormat("ccc, dd LLL yyyy HH:mm:ss ZZZZ");
 }
 
 function buildTeamsMessage(payload) {

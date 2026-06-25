@@ -14,10 +14,8 @@ function formatTimestamp(iso) {
   const format = "ccc, dd LLL yyyy HH:mm:ss ZZZZ";
   const slackTimestamp = Math.floor(date.toSeconds());
   const fallback = date.toUTC().toFormat(format);
-  const sanFrancisco = date.setZone("America/Los_Angeles").toFormat(format);
-  const shanghai = date.setZone("Asia/Shanghai").toFormat(format);
 
-  return `Local: <!date^${slackTimestamp}^{date_short_pretty} {time_secs}|${fallback}>\nSan Francisco: ${sanFrancisco}\nShanghai: ${shanghai}`;
+  return `<!date^${slackTimestamp}^{date_short_pretty} {time_secs}|${fallback}>`;
 }
 
 function buildSlackMessage(payload) {
